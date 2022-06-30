@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.utils.translation import gettext_lazy as _
 from .models import Users
+from .models import Projects, Contributors, Issues, Comments
 
 
 @admin.register(Users)
@@ -37,3 +38,9 @@ class UserAdmin(DjangoUserAdmin):
     list_display = ("email", "first_name", "last_name", "is_staff")
     search_fields = ("email", "first_name", "last_name")
     ordering = ("email",)
+
+
+admin.site.register(Projects)
+admin.site.register(Contributors)
+admin.site.register(Issues)
+admin.site.register(Comments)
