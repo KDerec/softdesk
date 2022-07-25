@@ -72,9 +72,6 @@ class Project(models.Model):
         help_text="Type du projet (back-end, front-end, iOS ou Android).",
     )
     author_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    contributors = models.ManyToManyField(
-        Users, through="Contributors", related_name="contributors_of_project"
-    )
 
     def __str__(self):
         """String for representing the Model object."""
@@ -84,13 +81,8 @@ class Project(models.Model):
 class Contributor(models.Model):
     """Contributor model."""
 
-    user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    project = models.ForeignKey(
-        Projects,
-        on_delete=models.CASCADE,
-        default=None,
-        related_name="project_of_contributor",
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    project = models.ManyToManyField(Project)
     role = models.CharField(
         max_length=128, blank=True, help_text="Rôle du contributeur."
     )
