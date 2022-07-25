@@ -1,11 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import Users
-from .models import Projects, Contributors, Issues, Comments
+from .models import User
+from .models import Project, Contributor, Issue, Comment
 
 
-@admin.register(Users)
+@admin.register(User)
 class UserAdmin(DjangoUserAdmin):
     """Define admin model for custom User model with no email field."""
 
@@ -31,7 +31,13 @@ class UserAdmin(DjangoUserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("email", "password1", "password2"),
+                "fields": (
+                    "email",
+                    "first_name",
+                    "last_name",
+                    "password1",
+                    "password2",
+                ),
             },
         ),
     )
@@ -40,7 +46,7 @@ class UserAdmin(DjangoUserAdmin):
     ordering = ("email",)
 
 
-admin.site.register(Projects)
-admin.site.register(Contributors)
-admin.site.register(Issues)
-admin.site.register(Comments)
+admin.site.register(Project)
+admin.site.register(Contributor)
+admin.site.register(Issue)
+admin.site.register(Comment)

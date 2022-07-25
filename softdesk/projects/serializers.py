@@ -1,17 +1,18 @@
 from rest_framework import serializers
-from .models import Users
+from .models import User
+from .models import Project, Contributor, Issue, Comment
 
 
 class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Users
+        model = User
         fields = ("id", "email", "password", "first_name", "last_name")
         extra_kwargs = {
             "password": {"write_only": True},
         }
 
     def create(self, validated_data):
-        user = Users.objects.create_user(
+        user = User.objects.create_user(
             validated_data["email"],
             password=validated_data["password"],
             first_name=validated_data["first_name"],
@@ -22,5 +23,5 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Users
+        model = User
         fields = "__all__"

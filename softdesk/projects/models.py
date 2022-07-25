@@ -40,11 +40,13 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
-class Users(AbstractUser):
-    """Users model."""
+class User(AbstractUser):
+    """User model."""
 
     username = None
     email = models.EmailField(_("email address"), unique=True)
+    first_name = models.CharField(max_length=128)
+    last_name = models.CharField(max_length=128)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -52,20 +54,20 @@ class Users(AbstractUser):
     objects = UserManager()
 
 
-class Projects(models.Model):
-    """Projects model."""
+class Project(models.Model):
+    """Project model."""
 
     PROJECT_TYPE_CHOICES = [
-        ("BE", "Back-End"),
-        ("FE", "Front-End"),
-        ("IO", "iOs"),
-        ("AN", "Android"),
+        ("Back-End", "Back-End"),
+        ("Front-End", "Front-End"),
+        ("iOs", "iOs"),
+        ("Android", "Android"),
     ]
 
     title = models.CharField(max_length=128, help_text="Titre du projet.")
     description = models.CharField(max_length=2048, help_text="Description du projet.")
     type = models.CharField(
-        max_length=2,
+        max_length=9,
         choices=PROJECT_TYPE_CHOICES,
         help_text="Type du projet (back-end, front-end, iOS ou Android).",
     )
@@ -79,8 +81,8 @@ class Projects(models.Model):
         return f"{self.id}, {self.title}"
 
 
-class Contributors(models.Model):
-    """Contributors model."""
+class Contributor(models.Model):
+    """Contributor model."""
 
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
     project = models.ForeignKey(
@@ -95,51 +97,51 @@ class Contributors(models.Model):
 
     def __str__(self):
         """String for representing the Model object."""
-        return f"{self.user}, {self.project}"
+        return f"{self.user}, {self.role}"
 
 
-class Issues(models.Model):
-    """Issues model."""
+class Issue(models.Model):
+    """Issue model."""
 
     ISSUE_TAG = [
         ("BUG", "BUG"),
-        ("UP", "AMÉLIORATION"),
-        ("TASK", "TÂCHE"),
+        ("AMÉLIORATION", "AMÉLIORATION"),
+        ("TÂCHE", "TÂCHE"),
     ]
     ISSUE_PRIORITY = [
-        ("LOW", "FAIBLE"),
-        ("MOY", "MOYENNE"),
-        ("HIGH", "ÉLEVÉE"),
+        ("FAIBLE", "FAIBLE"),
+        ("MOYENNE", "MOYENNE"),
+        ("ÉLEVÉE", "ÉLEVÉE"),
     ]
     ISSUE_STATUS = [
-        ("TODO", "À FAIRE"),
-        ("RUN", "EN COURS"),
-        ("DONE", "TERMINÉ"),
+        ("À FAIRE", "À FAIRE"),
+        ("EN COURS", "EN COURS"),
+        ("TERMINÉ", "TERMINÉ"),
     ]
 
     title = models.CharField(max_length=128, help_text="Titre du problème.")
     desc = models.CharField(max_length=128, help_text="Description du problème.")
     tag = models.CharField(
-        max_length=4,
+        max_length=12,
         choices=ISSUE_TAG,
         help_text="Balise du problème (BUG, AMÉLIORATION ou TÂCHE).",
     )
     priority = models.CharField(
-        max_length=4,
+        max_length=7,
         choices=ISSUE_PRIORITY,
         help_text="Priorité du problème (FAIBLE, MOYENNE ou ÉLEVÉE).",
     )
     status = models.CharField(
-        max_length=4,
+        max_length=8,
         choices=ISSUE_STATUS,
         help_text="Statut du problème (À faire, En cours ou Terminé).",
     )
-    project = models.ForeignKey(Projects, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
     author_user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="Issue_author"
     )
     assignee_user = models.ForeignKey(
-        Users,
+        User,
         default=author_user,
         on_delete=models.CASCADE,
         related_name="Issue_assignee_user",
@@ -151,14 +153,14 @@ class Issues(models.Model):
         return f"{self.title}, {self.tag}"
 
 
-class Comments(models.Model):
-    """Comments model."""
+class Comment(models.Model):
+    """Comment model."""
 
     description = models.CharField(
         max_length=2048, help_text="Description du commentaire."
     )
     author_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    issue = models.ForeignKey(Issues, on_delete=models.CASCADE)
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

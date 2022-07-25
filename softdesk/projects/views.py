@@ -1,19 +1,18 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from .models import Users
-from .serializers import UserSerializer, SignUpSerializer
+from .models import Project, User, Contributor, Issue, Comment
+from .serializers import ProjectSerializer, UserSerializer, SignUpSerializer, ContributorSerializer
 
 
 class SignUp(generics.CreateAPIView):
-    queryset = Users.objects.all()
+    queryset = User.objects.all()
     serializer_class = SignUpSerializer
     permission_classes = ()
 
 
-class UsersList(generics.ListAPIView):
-    queryset = Users.objects.all()
+class UserView(generics.ListAPIView):
+    queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated,)
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
