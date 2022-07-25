@@ -1,10 +1,7 @@
-from django.urls import path
-from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework.routers import DefaultRouter
 from . import views
 
-urlpatterns = [
-    path("users", views.UsersList.as_view()),
-    path("users/<int:pk>/", views.UserDetail.as_view()),
-]
+router = DefaultRouter()
+router.register(r"", views.ProjectViewSet, basename="project")
 
-urlpatterns = format_suffix_patterns(urlpatterns)
+urlpatterns = router.urls
