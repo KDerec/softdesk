@@ -16,14 +16,18 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt import views as jwt_views
-from projects.views import SignUp, UserView
+from rest_framework.routers import SimpleRouter
+from projects.views import SignUp, UserViewSet
 
+router = SimpleRouter()
+router.register(r"account", UserViewSet, basename="user")
 
-urlpatterns = [
+urlpatterns = router.urls
+
+urlpatterns += [
     path("api-auth/", include("rest_framework.urls")),
     path("admin/", admin.site.urls),
     path("projects/", include("projects.urls")),
-    path("accounts", UserView.as_view()),
     path(
         "api/token/", jwt_views.TokenObtainPairView.as_view(), name="token_obtain_pair"
     ),

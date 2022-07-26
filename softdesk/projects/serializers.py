@@ -24,7 +24,7 @@ class SignUpSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "email", "password", "first_name", "last_name"]
+        fields = ("id", "email", "password", "first_name", "last_name")
 
 
 class ProjectSerializer(serializers.HyperlinkedModelSerializer):
