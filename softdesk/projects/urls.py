@@ -14,7 +14,3 @@ urlpatterns = [
     path(r"", include(router.urls)),
     path(r"", include(projects_router.urls)),
 ]
-
-
-
-urlpatterns = router.urls
