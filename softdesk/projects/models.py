@@ -81,8 +81,14 @@ class Project(models.Model):
 class Contributor(models.Model):
     """Contributor model."""
 
+    PERMISSION_CHOICES = [("Responsable", "Responsable"), ("Contributeur", "Contributeur")]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     project = models.ManyToManyField(Project)
+    permission = models.CharField(
+        max_length=12,
+        choices=PERMISSION_CHOICES,
+    )
     role = models.CharField(
         max_length=128, blank=True, help_text="Rôle du contributeur."
     )
