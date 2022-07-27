@@ -27,7 +27,37 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ("id", "email", "password", "first_name", "last_name")
 
 
-class ProjectSerializer(serializers.HyperlinkedModelSerializer):
+class ProjectListSerializer(serializers.HyperlinkedModelSerializer):
+    author_user = serializers.ReadOnlyField(source="author_user.email")
+
     class Meta:
         model = Project
+        fields = (
+            "id",
+            "url",
+            "title",
+            "description",
+            "type",
+            "author_user",
+        )
+
+
+class ProjectDetailSerializer(ProjectListSerializer):
+    contributors = serializers.SerializerMethodField("get_contributors")
+
+    def get_contributors(self, project):
+        contributors = ContributorSerializer(
+            project.contributor_set.all(),
+            many=True,
+            context={"request": self.context["request"]},
+        ).data
+        return contributors
+
+    class Meta(ProjectListSerializer.Meta):
+        fields = ProjectListSerializer.Meta.fields + ("contributors",)
+
+
+class ContributorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contributor
         fields = "__all__"
