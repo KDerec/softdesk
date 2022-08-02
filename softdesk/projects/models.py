@@ -53,6 +53,10 @@ class User(AbstractUser):
 
     objects = UserManager()
 
+    @property
+    def user_id(self):
+        return self.pk
+
 
 class Project(models.Model):
     """Project model."""
@@ -71,20 +75,27 @@ class Project(models.Model):
         choices=PROJECT_TYPE_CHOICES,
         help_text="Type du projet (back-end, front-end, iOS ou Android).",
     )
-    author_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    author_user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         """String for representing the Model object."""
         return f"{self.id}, {self.title}"
 
+    @property
+    def project_id(self):
+        return self.pk
+
 
 class Contributor(models.Model):
     """Contributor model."""
 
-    PERMISSION_CHOICES = [("Responsable", "Responsable"), ("Contributeur", "Contributeur")]
+    PERMISSION_CHOICES = [
+        ("Responsable", "Responsable"),
+        ("Contributeur", "Contributeur"),
+    ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    project = models.ManyToManyField(Project)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
     permission = models.CharField(
         max_length=12,
         choices=PERMISSION_CHOICES,
@@ -92,6 +103,12 @@ class Contributor(models.Model):
     role = models.CharField(
         max_length=128, blank=True, help_text="Rôle du contributeur."
     )
+
+    class Meta:
+        unique_together = (
+            "user_id",
+            "project_id",
+        )
 
     def __str__(self):
         """String for representing the Model object."""
@@ -136,7 +153,7 @@ class Issue(models.Model):
     )
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     author_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="Issue_author"
+        User, on_delete=models.CASCADE, related_name="Issue_author_user"
     )
     assignee_user = models.ForeignKey(
         User,
@@ -157,10 +174,14 @@ class Comment(models.Model):
     description = models.CharField(
         max_length=2048, help_text="Description du commentaire."
     )
-    author_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    author_user = models.ForeignKey(User, on_delete=models.CASCADE)
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         """String for representing the Model object."""
         return f"{self.description}, {self.author_user}"
+
+    @property
+    def comment_id(self):
+        return self.pk
