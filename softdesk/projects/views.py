@@ -29,6 +29,13 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author_user=self.request.user)
+        author_contributor = Contributor(
+            user_id=self.request.user.id,
+            project_id=serializer.instance.id,
+            permission="Responsable",
+            role="Auteur",
+        )
+        author_contributor.save()
 
 
 class ContributorViewSet(viewsets.ModelViewSet):
