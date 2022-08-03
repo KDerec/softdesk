@@ -94,8 +94,8 @@ class Contributor(models.Model):
         ("Contributeur", "Contributeur"),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    user_id = models.IntegerField()
+    project_id = models.IntegerField()
     permission = models.CharField(
         max_length=12,
         choices=PERMISSION_CHOICES,

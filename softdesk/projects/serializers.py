@@ -24,40 +24,37 @@ class SignUpSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("id", "email", "password", "first_name", "last_name")
+        fields = (
+            "user_id",
+            "first_name",
+            "last_name",
+            "email",
+            "password",
+        )
 
 
-class ProjectListSerializer(serializers.HyperlinkedModelSerializer):
-    author_user = serializers.ReadOnlyField(source="author_user.email")
+class ProjectSerializer(serializers.ModelSerializer):
+    author_user_id = serializers.ReadOnlyField(source="author_user.id")
 
     class Meta:
         model = Project
         fields = (
-            "id",
-            "url",
+            "project_id",
             "title",
             "description",
             "type",
-            "author_user",
+            "author_user_id",
         )
 
 
-class ProjectDetailSerializer(ProjectListSerializer):
-    contributors = serializers.SerializerMethodField("get_contributors")
-
-    def get_contributors(self, project):
-        contributors = ContributorSerializer(
-            project.contributor_set.all(),
-            many=True,
-            context={"request": self.context["request"]},
-        ).data
-        return contributors
-
-    class Meta(ProjectListSerializer.Meta):
-        fields = ProjectListSerializer.Meta.fields + ("contributors",)
-
-
 class ContributorSerializer(serializers.ModelSerializer):
+    project_id = serializers.ReadOnlyField()
+
     class Meta:
         model = Contributor
-        fields = "__all__"
+        fields = (
+            "user_id",
+            "project_id",
+            "permission",
+            "role",
+        )

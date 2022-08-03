@@ -1,11 +1,9 @@
 from rest_framework import viewsets
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from .models import Project, User, Contributor, Issue, Comment
 from .serializers import (
-    ProjectDetailSerializer,
-    ProjectListSerializer,
+    ProjectSerializer,
     UserSerializer,
     SignUpSerializer,
     ContributorSerializer,
@@ -26,26 +24,11 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
-    serializer_class = ProjectDetailSerializer
+    serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(author_user=self.request.user)
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = ProjectListSerializer(
-                page, many=True, context={"request": request}
-            )
-            return self.get_paginated_response(serializer.data)
-
-        serializer = ProjectListSerializer(
-            queryset, many=True, context={"request": request}
-        )
-        return Response(serializer.data)
 
 
 class ContributorViewSet(viewsets.ModelViewSet):
@@ -53,14 +36,6 @@ class ContributorViewSet(viewsets.ModelViewSet):
     serializer_class = ContributorSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-
-class UserView(generics.ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class UserDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Users.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated,)
+    def perform_create(self, serializer):
+        project_id = int(self.kwargs["project_pk"])
+        serializer.save(project_id=project_id)
