@@ -4,8 +4,6 @@ from . import views
 
 router = routers.SimpleRouter()
 router.register(r"", views.ProjectViewSet)
-router.register(r"users", views.ContributorViewSet)
-
 
 projects_router = routers.NestedSimpleRouter(router, r"", lookup="project")
 projects_router.register(r"users", views.ContributorViewSet, basename="contributor")
