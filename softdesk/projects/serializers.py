@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import User
-from .models import Project, Contributor, Issue, Comment
+from .models import User, Project, Contributor, Issue, Comment
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -49,6 +48,12 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 class ContributorSerializer(serializers.ModelSerializer):
     project_id = serializers.ReadOnlyField()
+
+    def validate_user_id(self, value):
+        if not User.objects.filter(id=value):
+            raise serializers.ValidationError("Ce numéro d'utilisteur n'existe pas.")
+
+        return value
 
     class Meta:
         model = Contributor
