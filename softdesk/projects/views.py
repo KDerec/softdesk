@@ -50,6 +50,10 @@ class ContributorViewSet(viewsets.ModelViewSet):
     serializer_class = ContributorSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        project_id = int(self.kwargs["project_pk"])
+        return super().get_queryset().filter(project_id=project_id)
+
     def perform_create(self, serializer):
         project_id = int(self.kwargs["project_pk"])
         serializer.save(project_id=project_id)
