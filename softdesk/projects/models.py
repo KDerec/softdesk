@@ -57,6 +57,10 @@ class User(AbstractUser):
     def user_id(self):
         return self.pk
 
+    def __str__(self):
+        """String for representing the Model object."""
+        return f"{self.id}, {self.email}"
+
 
 class Project(models.Model):
     """Project model."""
@@ -94,7 +98,7 @@ class Contributor(models.Model):
         ("Contributeur", "Contributeur"),
     ]
 
-    user_id = models.IntegerField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     permission = models.CharField(
         max_length=12,
@@ -106,13 +110,13 @@ class Contributor(models.Model):
 
     class Meta:
         unique_together = (
-            "user_id",
-            "project_id",
+            "user",
+            "project",
         )
 
     def __str__(self):
         """String for representing the Model object."""
-        return f"user_id: {self.user_id}, project: {self.project}"
+        return f"user: {self.user}, project: {self.project}"
 
 
 class Issue(models.Model):

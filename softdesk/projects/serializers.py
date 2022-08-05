@@ -33,7 +33,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-    author_user_id = serializers.ReadOnlyField(source="author_user.id")
+    author_user_id = serializers.ReadOnlyField()
 
     class Meta:
         model = Project
@@ -48,17 +48,20 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 class ContributorSerializer(serializers.ModelSerializer):
     project_id = serializers.ReadOnlyField()
+    user_id = serializers.ReadOnlyField()
+    user = serializers.EmailField(write_only=True)
 
-    def validate_user_id(self, value):
-        if not User.objects.filter(id=value):
-            raise serializers.ValidationError("Ce numéro d'utilisteur n'existe pas.")
+    def validate_user(self, value):
+        if not User.objects.filter(email=value):
+            raise serializers.ValidationError("Cet email d'utilisteur n'existe pas.")
 
-        return value
+        return User.objects.filter(email=value).get()
 
     class Meta:
         model = Contributor
         fields = (
             "user_id",
+            "user",
             "project_id",
             "permission",
             "role",
