@@ -112,7 +112,7 @@ class Contributor(models.Model):
 
     def __str__(self):
         """String for representing the Model object."""
-        return f"{self.user}, {self.role}"
+        return f"{self.user_id}, {self.role}"
 
 
 class Issue(models.Model):

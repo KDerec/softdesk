@@ -1,6 +1,8 @@
 from rest_framework import viewsets
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from django.http import Http404
+from django.shortcuts import get_object_or_404
 from .models import Project, User, Contributor, Issue, Comment
 from .serializers import (
     ProjectSerializer,
@@ -50,9 +52,36 @@ class ContributorViewSet(viewsets.ModelViewSet):
     serializer_class = ContributorSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # Perform the lookup filtering.
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+
+        assert lookup_url_kwarg in self.kwargs, (
+            "Expected view %s to be called with a URL keyword argument "
+            'named "%s". Fix your URL conf, or set the `.lookup_field` '
+            "attribute on the view correctly."
+            % (self.__class__.__name__, lookup_url_kwarg)
+        )
+
+        filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+        filtered_contributor = Contributor.objects.filter(
+            project_id=self.kwargs["project_pk"]
+        ).filter(user_id=filter_kwargs["pk"])
+        try:
+            filter_kwargs["pk"] = filtered_contributor.get().id
+        except:
+            raise Http404
+        obj = get_object_or_404(queryset, **filter_kwargs)
+
+        # May raise a permission denied
+        self.check_object_permissions(self.request, obj)
+
+        return obj
+
     def get_queryset(self):
-        project_id = int(self.kwargs["project_pk"])
-        return super().get_queryset().filter(project_id=project_id)
+        return super().get_queryset().filter(project_id=self.kwargs["project_pk"])
 
     def perform_create(self, serializer):
         project_id = int(self.kwargs["project_pk"])

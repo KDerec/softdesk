@@ -6,7 +6,7 @@ router = routers.SimpleRouter()
 router.register(r"", views.ProjectViewSet)
 
 projects_router = routers.NestedSimpleRouter(router, r"", lookup="project")
-projects_router.register(r"users", views.ContributorViewSet, basename="contributor")
+projects_router.register(r"users", views.ContributorViewSet)
 
 urlpatterns = [
     path(r"", include(router.urls)),
