@@ -5,6 +5,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from .models import Project, User, Contributor, Issue, Comment
 from .serializers import (
+    IssueSerializer,
     ProjectSerializer,
     UserSerializer,
     SignUpSerializer,
@@ -86,3 +87,13 @@ class ContributorViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         project_id = int(self.kwargs["project_pk"])
         serializer.save(project_id=project_id)
+
+
+class IssueViewSet(viewsets.ModelViewSet):
+    queryset = Issue.objects.all()
+    serializer_class = IssueSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        project = Project.objects.filter(id=self.kwargs["project_pk"]).get()
+        serializer.save(project=project, author_user=self.request.user)

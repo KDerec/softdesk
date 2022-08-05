@@ -63,3 +63,23 @@ class ContributorSerializer(serializers.ModelSerializer):
             "permission",
             "role",
         )
+
+
+class IssueSerializer(serializers.ModelSerializer):
+    project_id = serializers.ReadOnlyField()
+    author_user_id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Issue
+        fields = (
+            "id",
+            "title",
+            "desc",
+            "tag",
+            "priority",
+            "status",
+            "project_id",
+            "author_user_id",
+            "assignee_user",
+            "created_time",
+        )
