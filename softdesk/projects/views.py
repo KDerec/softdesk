@@ -88,17 +88,29 @@ class ContributorViewSet(viewsets.ModelViewSet):
         return obj
 
     def get_queryset(self):
-        return super().get_queryset().filter(project_id=self.kwargs["project_pk"])
+        project_id = self.kwargs["project_pk"]
+        check_project_exist_in_db(project_id)
+        if check_connected_user_is_project_contributor(self, project_id):
+            return super().get_queryset().filter(project_id=project_id)
+        else:
+            raise PermissionDenied()
 
     def perform_create(self, serializer):
-        project_id = int(self.kwargs["project_pk"])
-        serializer.save(project_id=project_id)
+        serializer.save(project_id=int(self.kwargs["project_pk"]))
 
 
 class IssueViewSet(viewsets.ModelViewSet):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        project_id = self.kwargs["project_pk"]
+        check_project_exist_in_db(project_id)
+        if check_connected_user_is_project_contributor(self, project_id):
+            return super().get_queryset().filter(project_id=project_id)
+        else:
+            raise PermissionDenied()
 
     def perform_create(self, serializer):
         project = Project.objects.filter(id=self.kwargs["project_pk"]).get()
@@ -108,6 +120,17 @@ class IssueViewSet(viewsets.ModelViewSet):
 def check_project_exist_in_db(project_id):
     if project_id not in Project.objects.values_list("id", flat=True):
         raise Http404
+
+
+def check_connected_user_is_project_contributor(self, project_id):
+    connected_user_id = self.request.user.id
+    if connected_user_id in Contributor.objects.filter(
+        project_id=project_id
+    ).values_list("user_id", flat=True):
+        return True
+    else:
+        return False
+
 
 def create_project_id_list_connected_user(self):
     project_id_list = []
