@@ -2,6 +2,7 @@ from rest_framework import viewsets
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from django.http import Http404
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from .models import Project, User, Contributor, Issue, Comment
 from .serializers import (
@@ -31,11 +32,17 @@ class ProjectViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        id_projects_list = []
-        id_connected_user = self.request.user.id
-        for obj in Contributor.objects.filter(user_id=id_connected_user):
-            id_projects_list.append(obj.project_id)
-        return super().get_queryset().filter(id__in=id_projects_list)
+        project_id_list = create_project_id_list_connected_user(self)
+        if self.detail == True:
+            project_id = int(self.kwargs["pk"])
+            if project_id in project_id_list:
+                return super().get_queryset().filter(id__in=project_id_list)
+            if project_id not in Project.objects.values_list("id", flat=True):
+                raise Http404
+            else:
+                raise PermissionDenied()
+        if self.detail == False:
+            return super().get_queryset().filter(id__in=project_id_list)
 
     def perform_create(self, serializer):
         serializer.save(author_user=self.request.user)
@@ -97,3 +104,12 @@ class IssueViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         project = Project.objects.filter(id=self.kwargs["project_pk"]).get()
         serializer.save(project=project, author_user=self.request.user)
+
+
+def create_project_id_list_connected_user(self):
+    project_id_list = []
+    connected_user_id = self.request.user.id
+    for contributor in Contributor.objects.filter(user_id=connected_user_id):
+        project_id_list.append(contributor.project_id)
+
+    return project_id_list
