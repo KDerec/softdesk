@@ -34,11 +34,10 @@ class ProjectViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         project_id_list = create_project_id_list_connected_user(self)
         if self.detail == True:
-            project_id = int(self.kwargs["pk"])
+            project_id = self.kwargs["pk"]
+            check_project_exist_in_db(project_id)
             if project_id in project_id_list:
                 return super().get_queryset().filter(id__in=project_id_list)
-            if project_id not in Project.objects.values_list("id", flat=True):
-                raise Http404
             else:
                 raise PermissionDenied()
         if self.detail == False:
@@ -105,6 +104,10 @@ class IssueViewSet(viewsets.ModelViewSet):
         project = Project.objects.filter(id=self.kwargs["project_pk"]).get()
         serializer.save(project=project, author_user=self.request.user)
 
+
+def check_project_exist_in_db(project_id):
+    if project_id not in Project.objects.values_list("id", flat=True):
+        raise Http404
 
 def create_project_id_list_connected_user(self):
     project_id_list = []
