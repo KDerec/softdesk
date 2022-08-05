@@ -95,7 +95,7 @@ class Contributor(models.Model):
     ]
 
     user_id = models.IntegerField()
-    project_id = models.IntegerField()
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
     permission = models.CharField(
         max_length=12,
         choices=PERMISSION_CHOICES,
@@ -112,7 +112,7 @@ class Contributor(models.Model):
 
     def __str__(self):
         """String for representing the Model object."""
-        return f"{self.user_id}, {self.role}"
+        return f"user_id: {self.user_id}, project: {self.project}"
 
 
 class Issue(models.Model):
@@ -165,7 +165,7 @@ class Issue(models.Model):
 
     def __str__(self):
         """String for representing the Model object."""
-        return f"{self.title}, {self.tag}"
+        return f"{self.id}, {self.title}"
 
 
 class Comment(models.Model):

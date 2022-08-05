@@ -95,7 +95,9 @@ class ContributorViewSet(viewsets.ModelViewSet):
             raise PermissionDenied()
 
     def perform_create(self, serializer):
-        serializer.save(project_id=int(self.kwargs["project_pk"]))
+        project_id = int(self.kwargs["project_pk"])
+        project = Project.objects.filter(id=project_id).get()
+        serializer.save(project=project)
 
 
 class IssueViewSet(viewsets.ModelViewSet):
@@ -112,7 +114,8 @@ class IssueViewSet(viewsets.ModelViewSet):
             raise PermissionDenied()
 
     def perform_create(self, serializer):
-        project = Project.objects.filter(id=int(self.kwargs["project_pk"])).get()
+        project_id = int(self.kwargs["project_pk"])
+        project = Project.objects.filter(id=project_id).get()
         serializer.save(project=project, author_user=self.request.user)
 
 
