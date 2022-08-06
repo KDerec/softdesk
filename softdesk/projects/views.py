@@ -141,6 +141,14 @@ class CommentViewSet(viewsets.ModelViewSet):
         else:
             raise PermissionDenied()
 
+    def perform_create(self, serializer):
+        project_id = self.kwargs["project_pk"]
+        check_project_exist_in_db(project_id)
+        issue_id = int(self.kwargs["issue_pk"])
+        check_issue_exist_in_db(issue_id)
+        issue = Issue.objects.filter(id=issue_id).get()
+        serializer.save(issue=issue, author_user=self.request.user)
+
 
 def check_project_exist_in_db(project_id):
     try:
