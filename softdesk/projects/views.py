@@ -110,6 +110,9 @@ class IssueViewSet(viewsets.ModelViewSet):
         project_id = self.kwargs["project_pk"]
         check_project_exist_in_db(project_id)
         if check_connected_user_is_project_contributor(self, project_id):
+            if self.detail == True:
+                issue_id = self.kwargs["pk"]
+                check_issue_exist_in_db(issue_id)
             return super().get_queryset().filter(project_id=project_id)
         else:
             raise PermissionDenied()
@@ -128,10 +131,20 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 def check_project_exist_in_db(project_id):
     try:
-        if int(project_id) not in Project.objects.values_list("id", flat=True):
+        project_id = int(project_id)
+        if project_id not in Project.objects.values_list("id", flat=True):
             raise NotFound("Le numéro de projet indiqué n'existe pas.")
     except ValueError:
         raise NotFound("Le numéro de projet indiqué n'est pas un numéro.")
+
+
+def check_issue_exist_in_db(issue_id):
+    try:
+        issue_id = int(issue_id)
+        if issue_id not in Issue.objects.values_list("id", flat=True):
+            raise NotFound("Le numéro de issue indiqué n'existe pas.")
+    except ValueError:
+        raise NotFound("Le numéro de issue indiqué n'est pas un numéro.")
 
 
 def check_connected_user_is_project_contributor(self, project_id):
