@@ -5,6 +5,7 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from django.shortcuts import get_object_or_404
 from .models import Project, User, Contributor, Issue, Comment
 from .serializers import (
+    CommentSerializer,
     IssueSerializer,
     ProjectSerializer,
     UserSerializer,
@@ -45,7 +46,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author_user=self.request.user)
         author_contributor = Contributor(
-            user_id=self.request.user.id,
+            user=self.request.user,
             project_id=serializer.instance.id,
             permission="Responsable",
             role="Auteur",
@@ -117,6 +118,12 @@ class IssueViewSet(viewsets.ModelViewSet):
         project_id = int(self.kwargs["project_pk"])
         project = Project.objects.filter(id=project_id).get()
         serializer.save(project=project, author_user=self.request.user)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
 
 
 def check_project_exist_in_db(project_id):

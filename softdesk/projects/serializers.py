@@ -95,3 +95,9 @@ class IssueSerializer(serializers.ModelSerializer):
             "assignee_user_id",
             "created_time",
         )
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = "__all__"
