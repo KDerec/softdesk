@@ -71,6 +71,14 @@ class ContributorSerializer(serializers.ModelSerializer):
 class IssueSerializer(serializers.ModelSerializer):
     project_id = serializers.ReadOnlyField()
     author_user_id = serializers.ReadOnlyField()
+    assignee_user_id = serializers.ReadOnlyField()
+    assignee_user = serializers.EmailField(write_only=True)
+
+    def validate_assignee_user(self, value):
+        if not User.objects.filter(email=value):
+            raise serializers.ValidationError("Cet email d'utilisteur n'existe pas.")
+
+        return User.objects.filter(email=value).get()
 
     class Meta:
         model = Issue
@@ -84,5 +92,6 @@ class IssueSerializer(serializers.ModelSerializer):
             "project_id",
             "author_user_id",
             "assignee_user",
+            "assignee_user_id",
             "created_time",
         )
