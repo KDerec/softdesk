@@ -128,6 +128,17 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        project_id = self.kwargs["project_pk"]
+        check_project_exist_in_db(project_id)
+        if check_connected_user_is_project_contributor(self, project_id):
+            issue_id = self.kwargs["issue_pk"]
+            check_issue_exist_in_db(issue_id)
+            check_project_is_issue_attribut(project_id, issue_id)
+            return super().get_queryset().filter(issue_id=issue_id)
+        else:
+            raise PermissionDenied()
+
 
 def check_project_exist_in_db(project_id):
     try:
@@ -145,6 +156,13 @@ def check_issue_exist_in_db(issue_id):
             raise NotFound("Le numéro de issue indiqué n'existe pas.")
     except ValueError:
         raise NotFound("Le numéro de issue indiqué n'est pas un numéro.")
+
+
+def check_project_is_issue_attribut(project_id, issue_id):
+    project_id = int(project_id)
+    issue_id = int(issue_id)
+    if project_id != Issue.objects.filter(id=issue_id).get().project_id:
+        raise NotFound("Le numéro de issue indiqué n'existe pas pour ce projet.")
 
 
 def check_connected_user_is_project_contributor(self, project_id):
