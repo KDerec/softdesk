@@ -97,6 +97,7 @@ class ContributorViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         project_id = int(self.kwargs["project_pk"])
+        check_project_exist_in_db(project_id)
         project = Project.objects.filter(id=project_id).get()
         serializer.save(project=project)
 
@@ -119,6 +120,7 @@ class IssueViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         project_id = int(self.kwargs["project_pk"])
+        check_project_exist_in_db(project_id)
         project = Project.objects.filter(id=project_id).get()
         serializer.save(project=project, author_user=self.request.user)
 
