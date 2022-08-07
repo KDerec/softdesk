@@ -36,10 +36,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
         if self.detail == True:
             project_id = self.kwargs["pk"]
             check_project_exist_in_db(project_id)
-            if int(project_id) in project_id_list:
+            if check_connected_user_is_project_contributor(self, project_id):
                 return super().get_queryset().filter(id__in=project_id_list)
-            else:
-                raise PermissionDenied()
         if self.detail == False:
             return super().get_queryset().filter(id__in=project_id_list)
 
@@ -92,8 +90,6 @@ class ContributorViewSet(viewsets.ModelViewSet):
         check_project_exist_in_db(project_id)
         if check_connected_user_is_project_contributor(self, project_id):
             return super().get_queryset().filter(project_id=project_id)
-        else:
-            raise PermissionDenied()
 
     def perform_create(self, serializer):
         project_id = int(self.kwargs["project_pk"])
@@ -115,8 +111,6 @@ class IssueViewSet(viewsets.ModelViewSet):
                 issue_id = self.kwargs["pk"]
                 check_issue_exist_in_db(issue_id)
             return super().get_queryset().filter(project_id=project_id)
-        else:
-            raise PermissionDenied()
 
     def perform_create(self, serializer):
         project_id = int(self.kwargs["project_pk"])
@@ -138,8 +132,6 @@ class CommentViewSet(viewsets.ModelViewSet):
             check_issue_exist_in_db(issue_id)
             check_project_is_issue_attribut(project_id, issue_id)
             return super().get_queryset().filter(issue_id=issue_id)
-        else:
-            raise PermissionDenied()
 
     def perform_create(self, serializer):
         project_id = self.kwargs["project_pk"]
@@ -184,7 +176,9 @@ def check_connected_user_is_project_contributor(self, project_id):
     ).values_list("user_id", flat=True):
         return True
     else:
-        return False
+        raise PermissionDenied(
+            f"Seul les contributeurs de ce projet (#{project_id}) sont autorisés à effectuer cette action."
+        )
 
 
 def create_project_id_list_connected_user(self):
