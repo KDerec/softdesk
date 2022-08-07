@@ -110,6 +110,7 @@ class IssueViewSet(viewsets.ModelViewSet):
             if self.detail == True:
                 issue_id = self.kwargs["pk"]
                 check_issue_exist_in_db(issue_id)
+                check_project_is_issue_attribut(project_id, issue_id)
             return super().get_queryset().filter(project_id=project_id)
 
     def perform_create(self, serializer):
@@ -131,6 +132,10 @@ class CommentViewSet(viewsets.ModelViewSet):
             issue_id = self.kwargs["issue_pk"]
             check_issue_exist_in_db(issue_id)
             check_project_is_issue_attribut(project_id, issue_id)
+            if self.detail == True:
+                comment_id = self.kwargs["pk"]
+                check_comment_exist_in_db(comment_id)
+                check_issue_is_comment_attribut(issue_id, comment_id)
             return super().get_queryset().filter(issue_id=issue_id)
 
     def perform_create(self, serializer):
@@ -160,12 +165,30 @@ def check_issue_exist_in_db(issue_id):
         raise NotFound("Le numéro de issue indiqué n'est pas un numéro.")
 
 
+def check_comment_exist_in_db(comment_id):
+    try:
+        comment_id = int(comment_id)
+        if comment_id not in Comment.objects.values_list("id", flat=True):
+            raise NotFound("Le numéro de commentaire indiqué n'existe pas.")
+    except ValueError:
+        raise NotFound("Le numéro de commentaire indiqué n'est pas un numéro.")
+
+
 def check_project_is_issue_attribut(project_id, issue_id):
     project_id = int(project_id)
     issue_id = int(issue_id)
     if project_id != Issue.objects.filter(id=issue_id).get().project_id:
         raise NotFound(
             "Le numéro de issue indiqué n'existe pas pour ce projet."
+        )
+
+
+def check_issue_is_comment_attribut(issue_id, comment_id):
+    issue_id = int(issue_id)
+    comment_id = int(comment_id)
+    if issue_id != Comment.objects.filter(id=comment_id).get().issue_id:
+        raise NotFound(
+            "Le numéro de commentaire indiqué n'existe pas pour cet issue."
         )
 
 
