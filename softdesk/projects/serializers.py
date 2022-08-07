@@ -53,7 +53,9 @@ class ContributorSerializer(serializers.ModelSerializer):
 
     def validate_user(self, value):
         if not User.objects.filter(email=value):
-            raise serializers.ValidationError("Cet email d'utilisteur n'existe pas.")
+            raise serializers.ValidationError(
+                "Cet email d'utilisteur n'existe pas."
+            )
 
         return User.objects.filter(email=value).get()
 

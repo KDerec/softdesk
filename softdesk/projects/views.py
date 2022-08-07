@@ -172,7 +172,9 @@ def check_project_is_issue_attribut(project_id, issue_id):
     project_id = int(project_id)
     issue_id = int(issue_id)
     if project_id != Issue.objects.filter(id=issue_id).get().project_id:
-        raise NotFound("Le numéro de issue indiqué n'existe pas pour ce projet.")
+        raise NotFound(
+            "Le numéro de issue indiqué n'existe pas pour ce projet."
+        )
 
 
 def check_connected_user_is_project_contributor(self, project_id):

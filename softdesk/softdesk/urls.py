@@ -28,7 +28,15 @@ urlpatterns += [
     path("api-auth/", include("rest_framework.urls")),
     path("admin/", admin.site.urls),
     path("projects/", include("projects.urls")),
-    path("login/", jwt_views.TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("login/refresh/", jwt_views.TokenRefreshView.as_view(), name="token_refresh"),
+    path(
+        "login/",
+        jwt_views.TokenObtainPairView.as_view(),
+        name="token_obtain_pair",
+    ),
+    path(
+        "login/refresh/",
+        jwt_views.TokenRefreshView.as_view(),
+        name="token_refresh",
+    ),
     path("signup", SignUp.as_view()),
 ]

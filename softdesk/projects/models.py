@@ -73,7 +73,9 @@ class Project(models.Model):
     ]
 
     title = models.CharField(max_length=128, help_text="Titre du projet.")
-    description = models.CharField(max_length=2048, help_text="Description du projet.")
+    description = models.CharField(
+        max_length=2048, help_text="Description du projet."
+    )
     type = models.CharField(
         max_length=9,
         choices=PROJECT_TYPE_CHOICES,
@@ -139,7 +141,9 @@ class Issue(models.Model):
     ]
 
     title = models.CharField(max_length=128, help_text="Titre du problème.")
-    desc = models.CharField(max_length=128, help_text="Description du problème.")
+    desc = models.CharField(
+        max_length=128, help_text="Description du problème."
+    )
     tag = models.CharField(
         max_length=12,
         choices=ISSUE_TAG,
@@ -169,7 +173,7 @@ class Issue(models.Model):
 
     def __str__(self):
         """String for representing the Model object."""
-        return f"{self.id}, {self.title}"
+        return f"issue: {self.id}, {self.title}; project: {self.project}"
 
 
 class Comment(models.Model):
@@ -184,7 +188,7 @@ class Comment(models.Model):
 
     def __str__(self):
         """String for representing the Model object."""
-        return f"{self.description}, {self.author_user}"
+        return f"comment: {self.id}; issue: {self.issue}"
 
     @property
     def comment_id(self):
