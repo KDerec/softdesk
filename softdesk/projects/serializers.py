@@ -76,7 +76,21 @@ class IssueSerializer(serializers.ModelSerializer):
 
     def validate_assignee_user(self, value):
         if not User.objects.filter(email=value):
-            raise serializers.ValidationError("Cet email d'utilisteur n'existe pas.")
+            raise serializers.ValidationError(
+                "Cet email d'utilisteur n'existe pas."
+            )
+
+        project_id = self.context["request"].parser_context["kwargs"][
+            "project_pk"
+        ]
+        user_id = User.objects.filter(email=value).get().id
+
+        if user_id not in Contributor.objects.filter(
+            project_id=int(project_id)
+        ).values_list("user_id", flat=True):
+            raise serializers.ValidationError(
+                "Cet utilisateur n'est pas un contributeur du projet."
+            )
 
         return User.objects.filter(email=value).get()
 
