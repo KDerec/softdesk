@@ -71,13 +71,12 @@ class ContributorViewSet(viewsets.ModelViewSet):
         )
 
         filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
-        filtered_contributor = Contributor.objects.filter(
-            project_id=self.kwargs["project_pk"]
-        ).filter(user_id=filter_kwargs["pk"])
-        try:
-            filter_kwargs["pk"] = filtered_contributor.get().id
-        except:
-            raise NotFound("Le numéro d'utilisateur renseigné n'existe pas.")
+
+        user_id = filter_kwargs["pk"]
+        project_id = self.kwargs["project_pk"]
+        contributor_id = get_contributor_id(project_id, user_id)
+        filter_kwargs["pk"] = contributor_id
+
         obj = get_object_or_404(queryset, **filter_kwargs)
 
         # May raise a permission denied
@@ -89,6 +88,9 @@ class ContributorViewSet(viewsets.ModelViewSet):
         project_id = self.kwargs["project_pk"]
         check_project_exist_in_db(project_id)
         if check_connected_user_is_project_contributor(self, project_id):
+            if self.detail == True:
+                user_id = self.kwargs["pk"]
+                check_contributor_exist_in_db(user_id)
             return super().get_queryset().filter(project_id=project_id)
 
     def perform_create(self, serializer):
@@ -156,6 +158,19 @@ def check_project_exist_in_db(project_id):
         raise NotFound("Le numéro de projet indiqué n'est pas un numéro.")
 
 
+def check_contributor_exist_in_db(user_id):
+    try:
+        user_id = int(user_id)
+        if user_id not in Contributor.objects.values_list(
+            "user_id", flat=True
+        ):
+            raise NotFound("Le numéro de contributeur indiqué n'existe pas.")
+    except ValueError:
+        raise NotFound(
+            "Le numéro de contributeur indiqué n'est pas un numéro."
+        )
+
+
 def check_issue_exist_in_db(issue_id):
     try:
         issue_id = int(issue_id)
@@ -180,6 +195,22 @@ def check_project_is_issue_attribut(project_id, issue_id):
     if project_id != Issue.objects.filter(id=issue_id).get().project_id:
         raise NotFound(
             "Le numéro de issue indiqué n'existe pas pour ce projet."
+        )
+
+
+def get_contributor_id(project_id, user_id):
+    project_id = int(project_id)
+    user_id = int(user_id)
+    try:
+        return (
+            Contributor.objects.filter(user_id=user_id)
+            .filter(project_id=project_id)
+            .get()
+            .id
+        )
+    except Contributor.DoesNotExist:
+        raise NotFound(
+            "Le numéro de d'utilisateur indiqué n'existe pas pour ce projet."
         )
 
 
