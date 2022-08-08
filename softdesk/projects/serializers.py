@@ -54,7 +54,19 @@ class ContributorSerializer(serializers.ModelSerializer):
     def validate_user(self, value):
         if not User.objects.filter(email=value):
             raise serializers.ValidationError(
-                "Cet email d'utilisteur n'existe pas."
+                "Cet email d'utilisateur n'existe pas."
+            )
+
+        project_id = self.context["request"].parser_context["kwargs"][
+            "project_pk"
+        ]
+        user_id = User.objects.filter(email=value).get().id
+
+        if Contributor.objects.filter(project_id=project_id).filter(
+            user_id=user_id
+        ):
+            raise serializers.ValidationError(
+                "Cet utilisateur est déjà un contributeur du projet."
             )
 
         return User.objects.filter(email=value).get()
