@@ -53,6 +53,9 @@ class User(AbstractUser):
 
     objects = UserManager()
 
+    class Meta:
+        ordering = ["email"]
+
     @property
     def user_id(self):
         return self.pk
@@ -82,6 +85,9 @@ class Project(models.Model):
         help_text="Type du projet (back-end, front-end, iOS ou Android).",
     )
     author_user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ["pk"]
 
     def __str__(self):
         """String for representing the Model object."""
@@ -115,6 +121,7 @@ class Contributor(models.Model):
             "user",
             "project",
         )
+        ordering = ["user_id"]
 
     def __str__(self):
         """String for representing the Model object."""
@@ -171,6 +178,9 @@ class Issue(models.Model):
     )
     created_time = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ["-created_time"]
+
     def __str__(self):
         """String for representing the Model object."""
         return f"issue: {self.id}, {self.title}; project: {self.project}"
@@ -185,6 +195,9 @@ class Comment(models.Model):
     author_user = models.ForeignKey(User, on_delete=models.CASCADE)
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_time"]
 
     def __str__(self):
         """String for representing the Model object."""
