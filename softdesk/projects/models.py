@@ -58,6 +58,7 @@ class User(AbstractUser):
 
     @property
     def user_id(self):
+        """Return pk attribut of the object."""
         return self.pk
 
     def __str__(self):
@@ -95,6 +96,7 @@ class Project(models.Model):
 
     @property
     def project_id(self):
+        """Return pk attribut of the object."""
         return self.pk
 
 
@@ -205,4 +207,5 @@ class Comment(models.Model):
 
     @property
     def comment_id(self):
+        """Return pk attribut of the object."""
         return self.pk
