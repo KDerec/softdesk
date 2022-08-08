@@ -55,7 +55,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
         """Get the list of items for this view."""
         if self.detail == True:
             project_id = self.kwargs["pk"]
-            check_project_exist_in_db(project_id)
             return super().get_queryset().filter(id=project_id)
         if self.detail == False:
             project_id_list = create_project_id_list_connected_user(self)
