@@ -8,7 +8,7 @@ from rest_framework.permissions import (
 from rest_framework.exceptions import NotFound, PermissionDenied
 from django.shortcuts import get_object_or_404
 from .models import Project, User, Contributor, Issue, Comment
-from .permissions import IsAuthor, IsContributor
+from .permissions import IsAuthor, IsContributor, IsResponsibleContributor
 from .serializers import (
     SignUpSerializer,
     UserSerializer,
@@ -77,6 +77,19 @@ class ContributorViewSet(viewsets.ModelViewSet):
 
     queryset = Contributor.objects.all()
     serializer_class = ContributorSerializer
+    permission_classes = [IsAuthenticated, IsContributor]
+
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.request.method not in SAFE_METHODS:
+            return [
+                permission()
+                for permission in [IsResponsibleContributor, IsAuthenticated]
+            ]
+
+        return [permission() for permission in self.permission_classes]
 
     def get_serializer_class(self):
         """Return the class to use for the serializer."""
@@ -115,17 +128,14 @@ class ContributorViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Get the list of items for this view."""
         project_id = self.kwargs["project_pk"]
-        check_project_exist_in_db(project_id)
-        if check_connected_user_is_project_contributor(self, project_id):
-            if self.detail == True:
-                user_id = self.kwargs["pk"]
-                check_contributor_exist_in_db(user_id)
-            return super().get_queryset().filter(project_id=project_id)
+        if self.detail == True:
+            user_id = self.kwargs["pk"]
+            check_contributor_exist_in_db(user_id)
+        return super().get_queryset().filter(project_id=project_id)
 
     def perform_create(self, serializer):
         """Create a model instance."""
         project_id = int(self.kwargs["project_pk"])
-        check_project_exist_in_db(project_id)
         project = Project.objects.filter(id=project_id).get()
         serializer.save(project=project)
 

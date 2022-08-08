@@ -55,6 +55,48 @@ class IsContributor(permissions.BasePermission):
         return False
 
 
+class IsResponsibleContributor(permissions.BasePermission):
+    message = "Il faut être un contributeur de type responsable du projet pour effectuer cette action."
+
+    def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
+
+        project_id = request.parser_context["kwargs"]["project_pk"]
+        check_project_exist_in_db(project_id)
+        try:
+            if (
+                Contributor.objects.filter(
+                    project_id=int(
+                        request.parser_context["kwargs"]["project_pk"]
+                    )
+                )
+                .filter(user_id=request.user.id)
+                .get()
+                .permission
+                == "Responsable"
+            ):
+                return True
+        except Contributor.DoesNotExist:
+            return False
+
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_superuser:
+            return True
+
+        if (
+            Contributor.objects.filter(project_id=int(obj.project_id))
+            .filter(user_id=request.user.id)
+            .get()
+            .permission
+            == "Responsable"
+        ):
+            return True
+
+        return False
+
 
 def check_project_exist_in_db(project_id):
     """Raise exception if project object not found in database."""
