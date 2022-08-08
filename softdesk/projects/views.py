@@ -1,9 +1,14 @@
 from rest_framework import viewsets
 from rest_framework import generics
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import (
+    IsAdminUser,
+    IsAuthenticated,
+    SAFE_METHODS,
+)
 from rest_framework.exceptions import NotFound, PermissionDenied
 from django.shortcuts import get_object_or_404
 from .models import Project, User, Contributor, Issue, Comment
+from .permissions import IsAuthor, IsContributor
 from .serializers import (
     CommentSerializer,
     ContributorAutoAssignUserSerializer,
@@ -29,15 +34,24 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated, IsContributor]
+
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.request.method not in SAFE_METHODS:
+            return [permission() for permission in [IsAuthor, IsAuthenticated]]
+
+        return [permission() for permission in self.permission_classes]
 
     def get_queryset(self):
-        project_id_list = create_project_id_list_connected_user(self)
         if self.detail == True:
             project_id = self.kwargs["pk"]
             check_project_exist_in_db(project_id)
-            if check_connected_user_is_project_contributor(self, project_id):
-                return super().get_queryset().filter(id__in=project_id_list)
+            return super().get_queryset().filter(id=project_id)
         if self.detail == False:
+            project_id_list = create_project_id_list_connected_user(self)
             return super().get_queryset().filter(id__in=project_id_list)
 
     def perform_create(self, serializer):
