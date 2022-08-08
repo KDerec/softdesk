@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from .models import Project, User, Contributor, Issue, Comment
 from .serializers import (
     CommentSerializer,
+    ContributorAutoAssignUserSerializer,
     IssueSerializer,
     ProjectSerializer,
     UserSerializer,
@@ -54,6 +55,10 @@ class ContributorViewSet(viewsets.ModelViewSet):
     queryset = Contributor.objects.all()
     serializer_class = ContributorSerializer
 
+    def get_serializer_class(self):
+        if self.action == "update":
+            return ContributorAutoAssignUserSerializer
+        return super().get_serializer_class()
 
     def get_object(self):
         queryset = self.filter_queryset(self.get_queryset())
@@ -96,6 +101,11 @@ class ContributorViewSet(viewsets.ModelViewSet):
         check_project_exist_in_db(project_id)
         project = Project.objects.filter(id=project_id).get()
         serializer.save(project=project)
+
+    def perform_update(self, serializer):
+        user_id = int(self.kwargs["pk"])
+        user = User.objects.filter(id=user_id).get()
+        serializer.save(user=user)
 
 
 class IssueViewSet(viewsets.ModelViewSet):

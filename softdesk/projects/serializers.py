@@ -62,14 +62,29 @@ class ContributorSerializer(serializers.ModelSerializer):
         ]
         user_id = User.objects.filter(email=value).get().id
 
-        if Contributor.objects.filter(project_id=project_id).filter(
-            user_id=user_id
-        ):
-            raise serializers.ValidationError(
-                "Cet utilisateur est déjà un contributeur du projet."
-            )
+        if self.context["request"].method == "POST":
+            if Contributor.objects.filter(project_id=project_id).filter(
+                user_id=user_id
+            ):
+                raise serializers.ValidationError(
+                    "Cet utilisateur est déjà un contributeur du projet."
+                )
 
         return User.objects.filter(email=value).get()
+
+    class Meta:
+        model = Contributor
+        fields = (
+            "user_id",
+            "user",
+            "project_id",
+            "permission",
+            "role",
+        )
+
+
+class ContributorAutoAssignUserSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default="")
 
     class Meta:
         model = Contributor
