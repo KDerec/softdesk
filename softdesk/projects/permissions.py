@@ -1,6 +1,6 @@
 from rest_framework import permissions
 from rest_framework.exceptions import NotFound
-from .models import Contributor, Project
+from .models import Comment, Contributor, Issue, Project
 
 
 class IsAuthor(permissions.BasePermission):
@@ -46,9 +46,14 @@ class IsContributor(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser:
             return True
-
+        if type(obj) == Comment:
+            issue_id = obj.issue_id
+            issue = Issue.objects.filter(id=issue_id).get()
+            project_id = issue.project_id
+        else:
+            project_id = obj.project_id
         if request.user.id in Contributor.objects.filter(
-            project_id=int(obj.project_id)
+            project_id=int(project_id)
         ).values_list("user_id", flat=True):
             return True
 

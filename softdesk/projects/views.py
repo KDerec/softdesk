@@ -182,28 +182,39 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsContributor]
+
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.request.method not in SAFE_METHODS:
+            return [
+                permission()
+                for permission in [IsAuthor, IsAuthenticated, IsContributor]
+            ]
+
+        return [permission() for permission in self.permission_classes]
 
     def get_queryset(self):
         """Get the list of items for this view."""
         project_id = self.kwargs["project_pk"]
-        check_project_exist_in_db(project_id)
-        if check_connected_user_is_project_contributor(self, project_id):
-            issue_id = self.kwargs["issue_pk"]
-            check_issue_exist_in_db(issue_id)
-            check_project_is_issue_attribut(project_id, issue_id)
-            if self.detail == True:
-                comment_id = self.kwargs["pk"]
-                check_comment_exist_in_db(comment_id)
-                check_issue_is_comment_attribut(issue_id, comment_id)
-            return super().get_queryset().filter(issue_id=issue_id)
+        issue_id = self.kwargs["issue_pk"]
+        check_issue_exist_in_db(issue_id)
+        check_project_is_issue_attribut(project_id, issue_id)
+        if self.detail == True:
+            comment_id = self.kwargs["pk"]
+            check_comment_exist_in_db(comment_id)
+            check_issue_is_comment_attribut(issue_id, comment_id)
+        return super().get_queryset().filter(issue_id=issue_id)
 
     def perform_create(self, serializer):
         """Create a model instance."""
         project_id = self.kwargs["project_pk"]
         check_project_exist_in_db(project_id)
-        issue_id = int(self.kwargs["issue_pk"])
+        issue_id = self.kwargs["issue_pk"]
         check_issue_exist_in_db(issue_id)
-        issue = Issue.objects.filter(id=issue_id).get()
+        issue = Issue.objects.filter(id=int(issue_id)).get()
         serializer.save(issue=issue, author_user=self.request.user)
 
 
