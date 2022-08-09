@@ -120,25 +120,13 @@ class ContributorViewSet(viewsets.ModelViewSet):
     def get_object(self):
         """Returns the object the view is displaying."""
         queryset = self.filter_queryset(self.get_queryset())
-
-        # Perform the lookup filtering.
-        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-
-        assert lookup_url_kwarg in self.kwargs, (
-            "Expected view %s to be called with a URL keyword argument "
-            'named "%s". Fix your URL conf, or set the `.lookup_field` '
-            "attribute on the view correctly."
-            % (self.__class__.__name__, lookup_url_kwarg)
-        )
-
-        filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
-
-        user_id = filter_kwargs["pk"]
+        kwargs = {}
+        user_id = self.kwargs["pk"]
         project_id = self.kwargs["project_pk"]
         contributor_id = check_and_get_contributor_id(project_id, user_id)
-        filter_kwargs["pk"] = contributor_id
+        kwargs["pk"] = contributor_id
 
-        obj = get_object_or_404(queryset, **filter_kwargs)
+        obj = get_object_or_404(queryset, **kwargs)
 
         # May raise a permission denied
         self.check_object_permissions(self.request, obj)
@@ -153,13 +141,13 @@ class ContributorViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Create a model instance."""
         project_id = int(self.kwargs["project_pk"])
-        project = Project.objects.filter(id=project_id).get()
+        project = Project.objects.get(id=project_id)
         serializer.save(project=project)
 
     def perform_update(self, serializer):
         """Update a model instance."""
         user_id = int(self.kwargs["pk"])
-        user = User.objects.filter(id=user_id).get()
+        user = User.objects.get(id=user_id)
         serializer.save(user=user)
 
 
@@ -194,7 +182,7 @@ class IssueViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Create a model instance."""
         project_id = int(self.kwargs["project_pk"])
-        project = Project.objects.filter(id=project_id).get()
+        project = Project.objects.get(id=project_id)
         serializer.save(project=project, author_user=self.request.user)
 
 
@@ -235,5 +223,5 @@ class CommentViewSet(viewsets.ModelViewSet):
         check_project_exist_in_db(project_id)
         issue_id = self.kwargs["issue_pk"]
         check_issue_exist_in_db(issue_id)
-        issue = Issue.objects.filter(id=int(issue_id)).get()
+        issue = Issue.objects.get(id=int(issue_id))
         serializer.save(issue=issue, author_user=self.request.user)

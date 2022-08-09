@@ -41,9 +41,9 @@ class IsContributor(permissions.BasePermission):
         check_project_exist_in_db(project_id)
         if project_id:
             try:
-                if request.user.id in Contributor.objects.filter(
-                    project_id=int(project_id)
-                ).values_list("user_id", flat=True):
+                if Contributor.objects.filter(
+                    project_id=int(project_id), user_id=request.user.id
+                ):
                     return True
             except Contributor.DoesNotExist:
                 return False
@@ -55,13 +55,13 @@ class IsContributor(permissions.BasePermission):
             return True
         if type(obj) == Comment:
             issue_id = obj.issue_id
-            issue = Issue.objects.filter(id=issue_id).get()
+            issue = Issue.objects.get(id=issue_id)
             project_id = issue.project_id
         else:
             project_id = obj.project_id
-        if request.user.id in Contributor.objects.filter(
-            project_id=int(project_id)
-        ).values_list("user_id", flat=True):
+        if Contributor.objects.filter(
+            project_id=int(project_id), user_id=request.user.id
+        ):
             return True
 
         return False
@@ -82,14 +82,9 @@ class IsResponsibleContributor(permissions.BasePermission):
         check_project_exist_in_db(project_id)
         try:
             if (
-                Contributor.objects.filter(
-                    project_id=int(
-                        request.parser_context["kwargs"]["project_pk"]
-                    )
-                )
-                .filter(user_id=request.user.id)
-                .get()
-                .permission
+                Contributor.objects.get(
+                    project_id=int(project_id), user_id=request.user.id
+                ).permission
                 == "Responsable"
             ):
                 return True
@@ -103,10 +98,9 @@ class IsResponsibleContributor(permissions.BasePermission):
             return True
 
         if (
-            Contributor.objects.filter(project_id=int(obj.project_id))
-            .filter(user_id=request.user.id)
-            .get()
-            .permission
+            Contributor.objects.get(
+                project_id=int(obj.project_id), user_id=request.user.id
+            ).permission
             == "Responsable"
         ):
             return True

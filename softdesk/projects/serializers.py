@@ -3,7 +3,7 @@ Provides serializers for objects of "projects" application.
 """
 from rest_framework import serializers
 from .models import User, Project, Contributor, Issue, Comment
-from .checker import check_user_email_exist
+from .checker import check_user_email_exist, check_and_get_contributor_id
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -69,17 +69,16 @@ class ContributorSerializer(serializers.ModelSerializer):
         project_id = self.context["request"].parser_context["kwargs"][
             "project_pk"
         ]
-        user_id = User.objects.filter(email=value).get().id
-
+        user = User.objects.get(email=value)
         if self.context["request"].method == "POST":
-            if Contributor.objects.filter(project_id=project_id).filter(
-                user_id=user_id
+            if Contributor.objects.filter(
+                project_id=project_id, user_id=user.id
             ):
                 raise serializers.ValidationError(
                     "Cet utilisateur est déjà un contributeur du projet."
                 )
 
-        return User.objects.filter(email=value).get()
+        return user
 
     class Meta:
         model = Contributor
@@ -122,16 +121,10 @@ class IssueSerializer(serializers.ModelSerializer):
         project_id = self.context["request"].parser_context["kwargs"][
             "project_pk"
         ]
-        user_id = User.objects.filter(email=value).get().id
+        user = User.objects.get(email=value)
+        check_and_get_contributor_id(project_id, user.id)
 
-        if user_id not in Contributor.objects.filter(
-            project_id=int(project_id)
-        ).values_list("user_id", flat=True):
-            raise serializers.ValidationError(
-                "Cet utilisateur n'est pas un contributeur du projet."
-            )
-
-        return User.objects.filter(email=value).get()
+        return user
 
     class Meta:
         model = Issue
