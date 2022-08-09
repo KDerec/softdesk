@@ -88,7 +88,9 @@ class Project(models.Model):
         choices=PROJECT_TYPE_CHOICES,
         help_text="Type du projet (back-end, front-end, iOS ou Android).",
     )
-    author_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    author_user = models.ForeignKey(
+        User, default=User.objects.get(id=1), on_delete=models.SET_DEFAULT
+    )
 
     class Meta:
         ordering = ["pk"]
@@ -173,12 +175,15 @@ class Issue(models.Model):
     )
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     author_user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="Issue_author_user"
+        User,
+        default=User.objects.get(id=1),
+        on_delete=models.SET_DEFAULT,
+        related_name="Issue_author_user",
     )
     assignee_user = models.ForeignKey(
         User,
-        default=author_user,
-        on_delete=models.CASCADE,
+        default=1,
+        on_delete=models.SET_DEFAULT,
         related_name="Issue_assignee_user",
     )
     created_time = models.DateTimeField(auto_now_add=True)
@@ -197,7 +202,9 @@ class Comment(models.Model):
     description = models.CharField(
         max_length=2048, help_text="Description du commentaire."
     )
-    author_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    author_user = models.ForeignKey(
+        User, default=User.objects.get(id=1), on_delete=models.SET_DEFAULT
+    )
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True)
 
