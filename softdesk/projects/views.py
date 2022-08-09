@@ -147,22 +147,32 @@ class IssueViewSet(viewsets.ModelViewSet):
 
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
+    permission_classes = [IsAuthenticated, IsContributor]
+
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.request.method not in SAFE_METHODS:
+            return [
+                permission()
+                for permission in [IsAuthor, IsAuthenticated, IsContributor]
+            ]
+
+        return [permission() for permission in self.permission_classes]
 
     def get_queryset(self):
         """Get the list of items for this view."""
         project_id = self.kwargs["project_pk"]
-        check_project_exist_in_db(project_id)
-        if check_connected_user_is_project_contributor(self, project_id):
-            if self.detail == True:
-                issue_id = self.kwargs["pk"]
-                check_issue_exist_in_db(issue_id)
-                check_project_is_issue_attribut(project_id, issue_id)
-            return super().get_queryset().filter(project_id=project_id)
+        if self.detail == True:
+            issue_id = self.kwargs["pk"]
+            check_issue_exist_in_db(issue_id)
+            check_project_is_issue_attribut(project_id, issue_id)
+        return super().get_queryset().filter(project_id=project_id)
 
     def perform_create(self, serializer):
         """Create a model instance."""
         project_id = int(self.kwargs["project_pk"])
-        check_project_exist_in_db(project_id)
         project = Project.objects.filter(id=project_id).get()
         serializer.save(project=project, author_user=self.request.user)
 
