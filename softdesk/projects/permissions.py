@@ -1,6 +1,6 @@
 from rest_framework import permissions
-from rest_framework.exceptions import NotFound
-from .models import Comment, Contributor, Issue, Project
+from .models import Comment, Contributor, Issue
+from .checker import check_project_exist_in_db
 
 
 class IsAuthor(permissions.BasePermission):
@@ -101,13 +101,3 @@ class IsResponsibleContributor(permissions.BasePermission):
             return True
 
         return False
-
-
-def check_project_exist_in_db(project_id):
-    """Raise exception if project object not found in database."""
-    try:
-        project_id = int(project_id)
-        if project_id not in Project.objects.values_list("id", flat=True):
-            raise NotFound("Le numéro de projet indiqué n'existe pas.")
-    except ValueError:
-        raise NotFound("Le numéro de projet indiqué n'est pas un numéro.")

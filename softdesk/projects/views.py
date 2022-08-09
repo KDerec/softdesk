@@ -5,7 +5,6 @@ from rest_framework.permissions import (
     IsAuthenticated,
     SAFE_METHODS,
 )
-from rest_framework.exceptions import NotFound, PermissionDenied
 from django.shortcuts import get_object_or_404
 from .models import Project, User, Contributor, Issue, Comment
 from .permissions import IsAuthor, IsContributor, IsResponsibleContributor
@@ -17,6 +16,14 @@ from .serializers import (
     ContributorAutoAssignUserSerializer,
     IssueSerializer,
     CommentSerializer,
+)
+from .checker import (
+    check_and_get_contributor_id,
+    check_project_exist_in_db,
+    check_issue_exist_in_db,
+    check_comment_exist_in_db,
+    check_project_is_issue_attribut,
+    check_issue_is_comment_attribut,
 )
 
 
@@ -56,7 +63,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         if self.detail == True:
             project_id = self.kwargs["pk"]
             return super().get_queryset().filter(id=project_id)
-        project_id_list = create_project_id_list_connected_user(self)
+        project_id_list = self.create_project_id_list_connected_user()
         return super().get_queryset().filter(id__in=project_id_list)
 
     def perform_create(self, serializer):
@@ -69,6 +76,17 @@ class ProjectViewSet(viewsets.ModelViewSet):
             role="Auteur",
         )
         author_contributor.save()
+
+    def create_project_id_list_connected_user(self):
+        """Return project id list of the connected user."""
+        project_id_list = []
+        connected_user_id = self.request.user.id
+        for contributor in Contributor.objects.filter(
+            user_id=connected_user_id
+        ):
+            project_id_list.append(contributor.project_id)
+
+        return project_id_list
 
 
 class ContributorViewSet(viewsets.ModelViewSet):
@@ -114,7 +132,7 @@ class ContributorViewSet(viewsets.ModelViewSet):
 
         user_id = filter_kwargs["pk"]
         project_id = self.kwargs["project_pk"]
-        contributor_id = get_contributor_id(project_id, user_id)
+        contributor_id = check_and_get_contributor_id(project_id, user_id)
         filter_kwargs["pk"] = contributor_id
 
         obj = get_object_or_404(queryset, **filter_kwargs)
@@ -216,98 +234,3 @@ class CommentViewSet(viewsets.ModelViewSet):
         check_issue_exist_in_db(issue_id)
         issue = Issue.objects.filter(id=int(issue_id)).get()
         serializer.save(issue=issue, author_user=self.request.user)
-
-
-def check_project_exist_in_db(project_id):
-    """Raise exception if project object not found in database."""
-    try:
-        project_id = int(project_id)
-        if project_id not in Project.objects.values_list("id", flat=True):
-            raise NotFound("Le numéro de projet indiqué n'existe pas.")
-    except ValueError:
-        raise NotFound("Le numéro de projet indiqué n'est pas un numéro.")
-
-
-def check_issue_exist_in_db(issue_id):
-    """Raise exception if issue object not found in database."""
-    try:
-        issue_id = int(issue_id)
-        if issue_id not in Issue.objects.values_list("id", flat=True):
-            raise NotFound("Le numéro de problème indiqué n'existe pas.")
-    except ValueError:
-        raise NotFound("Le numéro de problème indiqué n'est pas un numéro.")
-
-
-def check_comment_exist_in_db(comment_id):
-    """Raise exception if comment object not found in database."""
-    try:
-        comment_id = int(comment_id)
-        if comment_id not in Comment.objects.values_list("id", flat=True):
-            raise NotFound("Le numéro de commentaire indiqué n'existe pas.")
-    except ValueError:
-        raise NotFound("Le numéro de commentaire indiqué n'est pas un numéro.")
-
-
-def check_project_is_issue_attribut(project_id, issue_id):
-    """Raise exception if project_id isn't an attribut of issue object."""
-    project_id = int(project_id)
-    issue_id = int(issue_id)
-    if project_id != Issue.objects.filter(id=issue_id).get().project_id:
-        raise NotFound(
-            "Le numéro de problème indiqué n'existe pas pour ce projet."
-        )
-
-
-def check_issue_is_comment_attribut(issue_id, comment_id):
-    """Raise exception if issue_id isn't an attribut of comment object."""
-    issue_id = int(issue_id)
-    comment_id = int(comment_id)
-    if issue_id != Comment.objects.filter(id=comment_id).get().issue_id:
-        raise NotFound(
-            "Le numéro de commentaire indiqué n'existe pas pour cet issue."
-        )
-
-
-def get_contributor_id(project_id, user_id):
-    """
-    Return id contributor according to project and user id or raise exception.
-    """
-    try:
-        project_id = int(project_id)
-        user_id = int(user_id)
-        return (
-            Contributor.objects.filter(user_id=user_id)
-            .filter(project_id=project_id)
-            .get()
-            .id
-        )
-    except Contributor.DoesNotExist:
-        raise NotFound(
-            "Le numéro de d'utilisateur indiqué n'existe pas pour ce projet."
-        )
-    except ValueError:
-        raise NotFound(
-            "Le numéro de contributeur indiqué n'est pas un numéro."
-        )
-
-
-def check_connected_user_is_project_contributor(self, project_id):
-    connected_user_id = self.request.user.id
-    if connected_user_id in Contributor.objects.filter(
-        project_id=int(project_id)
-    ).values_list("user_id", flat=True):
-        return True
-    else:
-        raise PermissionDenied(
-            f"Seul les contributeurs de ce projet (#{project_id}) sont autorisés à effectuer cette action."
-        )
-
-
-def create_project_id_list_connected_user(self):
-    """Return project id list of the connected user."""
-    project_id_list = []
-    connected_user_id = self.request.user.id
-    for contributor in Contributor.objects.filter(user_id=connected_user_id):
-        project_id_list.append(contributor.project_id)
-
-    return project_id_list
