@@ -3,6 +3,7 @@ Provides serializers for objects of "projects" application.
 """
 from rest_framework import serializers
 from .models import User, Project, Contributor, Issue, Comment
+from .checker import check_user_email_exist
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -64,11 +65,7 @@ class ContributorSerializer(serializers.ModelSerializer):
 
     def validate_user(self, value):
         """Return user object or raise validation error."""
-        if not User.objects.filter(email=value):
-            raise serializers.ValidationError(
-                "Cet email d'utilisateur n'existe pas."
-            )
-
+        check_user_email_exist(value)
         project_id = self.context["request"].parser_context["kwargs"][
             "project_pk"
         ]
@@ -121,11 +118,7 @@ class IssueSerializer(serializers.ModelSerializer):
 
     def validate_assignee_user(self, value):
         """Return user object or raise validation error."""
-        if not User.objects.filter(email=value):
-            raise serializers.ValidationError(
-                "Cet email d'utilisteur n'existe pas."
-            )
-
+        check_user_email_exist(value)
         project_id = self.context["request"].parser_context["kwargs"][
             "project_pk"
         ]

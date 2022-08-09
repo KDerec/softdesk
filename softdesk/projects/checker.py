@@ -1,8 +1,9 @@
 """
 Provides checker functions for the "projects" application.
 """
+from rest_framework import serializers
 from rest_framework.exceptions import NotFound
-from .models import Project, Contributor, Issue, Comment
+from .models import Project, Contributor, Issue, Comment, User
 
 
 def check_and_get_contributor_id(project_id, user_id):
@@ -76,3 +77,8 @@ def check_issue_is_comment_attribut(issue_id, comment_id):
         raise NotFound(
             "Le numéro de commentaire indiqué n'existe pas pour cet issue."
         )
+
+
+def check_user_email_exist(email):
+    if not User.objects.filter(email=email):
+        raise serializers.ValidationError("Cet email d'utilisateur n'existe pas.")
