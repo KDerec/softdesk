@@ -1,3 +1,6 @@
+"""
+Provides checker functions for the "projects" application.
+"""
 from rest_framework.exceptions import NotFound
 from .models import Project, Contributor, Issue, Comment
 

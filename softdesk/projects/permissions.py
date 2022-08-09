@@ -1,9 +1,14 @@
+"""
+Custom permissions.
+"""
 from rest_framework import permissions
 from .models import Comment, Contributor, Issue
 from .checker import check_project_exist_in_db
 
 
 class IsAuthor(permissions.BasePermission):
+    """Custom permission to check if connected user is the object author."""
+
     message = "Il faut être l'auteur de cet objet pour effectuer cet action."
 
     def has_object_permission(self, request, view, obj):
@@ -16,6 +21,8 @@ class IsAuthor(permissions.BasePermission):
 
 
 class IsContributor(permissions.BasePermission):
+    """Custom permission to check if connected user is project contributor."""
+
     message = (
         "Il faut être un contributeur du projet pour effectuer cette action."
     )
@@ -61,6 +68,10 @@ class IsContributor(permissions.BasePermission):
 
 
 class IsResponsibleContributor(permissions.BasePermission):
+    """
+    Custom permission to check if connected user is responsible project contributor.
+    """
+
     message = "Il faut être un contributeur de type responsable du projet pour effectuer cette action."
 
     def has_permission(self, request, view):

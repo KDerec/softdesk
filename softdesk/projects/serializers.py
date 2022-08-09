@@ -1,8 +1,13 @@
+"""
+Provides serializers for objects of "projects" application.
+"""
 from rest_framework import serializers
 from .models import User, Project, Contributor, Issue, Comment
 
 
 class SignUpSerializer(serializers.ModelSerializer):
+    """Sign up serializer."""
+
     class Meta:
         model = User
         fields = ("id", "email", "password", "first_name", "last_name")
@@ -11,6 +16,7 @@ class SignUpSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
+        """Return new user instance object."""
         user = User.objects.create_user(
             validated_data["email"],
             password=validated_data["password"],
@@ -21,6 +27,8 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """User object serializer."""
+
     class Meta:
         model = User
         fields = (
@@ -28,11 +36,12 @@ class UserSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "email",
-            "password",
         )
 
 
 class ProjectSerializer(serializers.ModelSerializer):
+    """Project object serializer."""
+
     author_user_id = serializers.ReadOnlyField()
 
     class Meta:
@@ -47,11 +56,14 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
 class ContributorSerializer(serializers.ModelSerializer):
+    """Contributor object serializer."""
+
     project_id = serializers.ReadOnlyField()
     user_id = serializers.ReadOnlyField()
     user = serializers.EmailField(write_only=True)
 
     def validate_user(self, value):
+        """Return user object or raise validation error."""
         if not User.objects.filter(email=value):
             raise serializers.ValidationError(
                 "Cet email d'utilisateur n'existe pas."
@@ -84,6 +96,8 @@ class ContributorSerializer(serializers.ModelSerializer):
 
 
 class ContributorAutoAssignUserSerializer(serializers.ModelSerializer):
+    """Contributor with hidden user field object serializer."""
+
     user = serializers.HiddenField(default="")
 
     class Meta:
@@ -98,12 +112,15 @@ class ContributorAutoAssignUserSerializer(serializers.ModelSerializer):
 
 
 class IssueSerializer(serializers.ModelSerializer):
+    """Issue object serializer."""
+
     project_id = serializers.ReadOnlyField()
     author_user_id = serializers.ReadOnlyField()
     assignee_user_id = serializers.ReadOnlyField()
     assignee_user = serializers.EmailField(write_only=True)
 
     def validate_assignee_user(self, value):
+        """Return user object or raise validation error."""
         if not User.objects.filter(email=value):
             raise serializers.ValidationError(
                 "Cet email d'utilisteur n'existe pas."
@@ -141,6 +158,8 @@ class IssueSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Comment object serializer."""
+
     author_user_id = serializers.ReadOnlyField()
     issue_id = serializers.ReadOnlyField()
 
