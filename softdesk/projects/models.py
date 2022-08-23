@@ -88,9 +88,7 @@ class Project(models.Model):
         choices=PROJECT_TYPE_CHOICES,
         help_text="Type du projet (back-end, front-end, iOS ou Android).",
     )
-    author_user = models.ForeignKey(
-        User, default=User.objects.get(id=1), on_delete=models.SET_DEFAULT
-    )
+    author_user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ["pk"]
@@ -156,7 +154,7 @@ class Issue(models.Model):
 
     title = models.CharField(max_length=128, help_text="Titre du problème.")
     desc = models.CharField(
-        max_length=128, help_text="Description du problème."
+        max_length=2048, help_text="Description du problème."
     )
     tag = models.CharField(
         max_length=12,
@@ -176,14 +174,14 @@ class Issue(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     author_user = models.ForeignKey(
         User,
-        default=User.objects.get(id=1),
-        on_delete=models.SET_DEFAULT,
+        null=True,
+        on_delete=models.SET_NULL,
         related_name="Issue_author_user",
     )
     assignee_user = models.ForeignKey(
         User,
-        default=1,
-        on_delete=models.SET_DEFAULT,
+        null=True,
+        on_delete=models.SET_NULL,
         related_name="Issue_assignee_user",
     )
     created_time = models.DateTimeField(auto_now_add=True)
@@ -202,9 +200,7 @@ class Comment(models.Model):
     description = models.CharField(
         max_length=2048, help_text="Description du commentaire."
     )
-    author_user = models.ForeignKey(
-        User, default=User.objects.get(id=1), on_delete=models.SET_DEFAULT
-    )
+    author_user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True)
 
