@@ -25,7 +25,6 @@ router.register(r"accounts", UserViewSet, basename="user")
 urlpatterns = router.urls
 
 urlpatterns += [
-    path("api-auth/", include("rest_framework.urls")),
     path("admin/", admin.site.urls),
     path("projects/", include("projects.urls")),
     path(
@@ -38,5 +37,5 @@ urlpatterns += [
         jwt_views.TokenRefreshView.as_view(),
         name="token_refresh",
     ),
-    path("signup", SignUp.as_view()),
+    path("signup/", SignUp.as_view()),
 ]
