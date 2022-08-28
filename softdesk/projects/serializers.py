@@ -2,6 +2,7 @@
 Provides serializers for objects of "projects" application.
 """
 from rest_framework import serializers
+from django.contrib.auth.password_validation import validate_password
 from .models import User, Project, Contributor, Issue, Comment
 from .checker import check_user_email_exist, check_and_get_contributor_id
 
@@ -16,15 +17,12 @@ class SignUpSerializer(serializers.ModelSerializer):
             "password": {"write_only": True},
         }
 
-    def create(self, validated_data):
-        """Return new user instance object."""
-        user = User.objects.create_user(
-            validated_data["email"],
-            password=validated_data["password"],
-            first_name=validated_data["first_name"],
-            last_name=validated_data["last_name"],
-        )
-        return user
+    def validate(self, attrs):
+        user = User(**attrs)
+        password = attrs.get("password")
+        validate_password(password=password, user=user)
+
+        return super().validate(attrs)
 
 
 class UserSerializer(serializers.ModelSerializer):
