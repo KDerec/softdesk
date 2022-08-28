@@ -40,15 +40,15 @@ The application will essentially allow users to create various [project](https:/
 to specific projects (called a [contributor](https://documenter.getpostman.com/view/22236994/VUqpudLA#f5a1c04d-84f0-4d21-91c8-7a59a28eff6a)), create [issues](https://documenter.getpostman.com/view/22236994/VUqpudLA#dc38e059-87fd-4c00-8e08-49da9ef83f97) within projects and assign [comments](https://documenter.getpostman.com/view/22236994/VUqpudLA#0c20dcc0-d910-4a83-aecd-69f735812786) to
 those issues based on their priorities, tags, etc.
 
-### API documentation sample ([discover here](https://documenter.getpostman.com/view/22236994/VUqpudLA)):
-<a href="https://github.com/KDerec/softdesk/blob/master/images/postman_doc_1.jpg">
-    <img src="images/postman_doc_1.jpg" alt="api-doc-screenshot" width="50%" height="50%">
+### API documentation sample ([complete here](https://documenter.getpostman.com/view/22236994/VUqpudLA)):
+<a href="https://github.com/KDerec/softdesk/blob/master/images/postman_doc_1.JPG">
+    <img src="images/postman_doc_1.JPG" alt="api-doc-screenshot" width="50%" height="50%">
 </a>  
 
 ___
 
-<a href="https://github.com/KDerec/softdesk/blob/master/images/postman_doc_2.jpg">
-    <img src="images/postman_doc_2.jpg" alt="api-doc-screenshot" width="50%" height="50%">
+<a href="https://github.com/KDerec/softdesk/blob/master/images/postman_doc_2.JPG">
+    <img src="images/postman_doc_2.JPG" alt="api-doc-screenshot" width="50%" height="50%">
 </a>  
 <p align="right">(<a href="#top">back to top</a>)</p>
 
