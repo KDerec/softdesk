@@ -37,6 +37,13 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
         )
 
+    def validate(self, attrs):
+        user = User(**attrs)
+        password = self.context["request"].data["password"]
+        validate_password(password=password, user=user)
+
+        return super().validate(attrs)
+
 
 class ProjectSerializer(serializers.ModelSerializer):
     """Project object serializer."""
