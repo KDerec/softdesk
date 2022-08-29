@@ -1,8 +1,7 @@
 """
 Manage all the views of the "projects" application.
 """
-from rest_framework import viewsets
-from rest_framework import generics
+from rest_framework import generics, viewsets, mixins
 from rest_framework.permissions import (
     IsAdminUser,
     IsAuthenticated,
@@ -38,7 +37,13 @@ class SignUp(generics.CreateAPIView):
     permission_classes = [IsAdminUser]
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
     """A viewset that provides actions for user object."""
 
     queryset = User.objects.all()
