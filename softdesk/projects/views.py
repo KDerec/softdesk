@@ -38,11 +38,12 @@ class SignUp(generics.CreateAPIView):
     permission_classes = [IsAdminUser]
 
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     """A viewset that provides actions for user object."""
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsAdminUser]
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
