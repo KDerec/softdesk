@@ -2,6 +2,7 @@
 Manage all the views of the "projects" application.
 """
 from rest_framework import generics, viewsets, mixins
+from rest_framework.response import Response
 from rest_framework.permissions import (
     IsAdminUser,
     IsAuthenticated,
@@ -49,6 +50,30 @@ class UserViewSet(
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdminUser]
+
+
+class MyInfo(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        """Returns the object the view is displaying."""
+        user = self.request.user
+
+        # May raise a permission denied
+        self.check_object_permissions(self.request, user)
+
+        return user
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        message = {
+            "To delete your personal information": "send a mail with your email account at your administrator."
+        }
+        data = serializer.data
+        data.update(message)
+        return Response(data)
 
 
 class ProjectViewSet(viewsets.ModelViewSet):

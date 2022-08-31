@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt import views as jwt_views
 from rest_framework.routers import SimpleRouter
-from projects.views import SignUp, UserViewSet
+from projects.views import SignUp, UserViewSet, MyInfo
 
 router = SimpleRouter()
 router.register(r"accounts", UserViewSet, basename="user")
@@ -38,4 +38,5 @@ urlpatterns += [
         name="token_refresh",
     ),
     path("signup/", SignUp.as_view()),
+    path("myinfo/", MyInfo.as_view()),
 ]
