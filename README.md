@@ -10,7 +10,7 @@
 
 <h3 align="center">RESTful API using Django REST</h3>
   <p align="center">
-    This student project is the #7 of my training.<br>You can follow the previous <a href="https://github.com/KDerec/litreview">here</a> and next one is in progress.
+    This student project is the #7 of my training.<br>You can follow the previous <a href="https://github.com/KDerec/litreview">here</a> and next one <a href="https://github.com/KDerec/Python_Testing">here</a>.
   </p>
 </div>
 
