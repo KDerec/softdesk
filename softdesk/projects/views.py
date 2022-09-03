@@ -94,7 +94,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Get the list of items for this view."""
-        if self.detail == True:
+        if self.detail is True:
             project_id = self.kwargs["pk"]
             return super().get_queryset().filter(id=project_id)
         project_id_list = self.create_project_id_list_connected_user()
@@ -204,7 +204,7 @@ class IssueViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Get the list of items for this view."""
         project_id = self.kwargs["project_pk"]
-        if self.detail == True:
+        if self.detail is True:
             issue_id = self.kwargs["pk"]
             check_issue_exist_in_db(issue_id)
             check_project_is_issue_attribut(project_id, issue_id)
@@ -242,7 +242,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         issue_id = self.kwargs["issue_pk"]
         check_issue_exist_in_db(issue_id)
         check_project_is_issue_attribut(project_id, issue_id)
-        if self.detail == True:
+        if self.detail is True:
             comment_id = self.kwargs["pk"]
             check_comment_exist_in_db(comment_id)
             check_issue_is_comment_attribut(issue_id, comment_id)

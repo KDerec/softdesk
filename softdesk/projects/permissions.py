@@ -32,9 +32,9 @@ class IsContributor(permissions.BasePermission):
             return True
 
         project_id = None
-        if view.basename == "project" and view.detail == False:
+        if view.basename == "project" and view.detail is False:
             return True
-        if view.basename == "project" and view.detail == True:
+        if view.basename == "project" and view.detail is True:
             project_id = request.parser_context["kwargs"]["pk"]
         if view.basename != "project":
             project_id = request.parser_context["kwargs"]["project_pk"]
